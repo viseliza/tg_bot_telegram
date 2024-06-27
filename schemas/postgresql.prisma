@@ -1,0 +1,65 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+
+model Telegram_user {
+    id              String      @unique
+    name            String
+    role            Role
+    events          Event[]
+    setting         Setting?
+}
+
+model Log {
+    id              Int        @id @default(autoincrement())
+    telegram_id     String
+    text            String
+    time            DateTime
+}
+
+
+model Event {
+    id              String          @unique
+    telegram_id     String
+    calendarId      String
+    summary         String
+    description     String
+    timeMin         String
+    timeMax         String
+    calendar        Calendar        @relation(fields: [calendarId], references: [calendarId])
+    user            Telegram_user   @relation(fields: [telegram_id], references: [id])
+}
+
+
+model Calendar {
+    calendarId      String      @unique
+    summary         String
+    events          Event[]
+}
+
+
+model Setting {
+    id          Int             @id @default(autoincrement())
+    interval    Int             @default(45)
+    monday      String          @default("08:00-18:00")
+    tuesday     String          @default("08:00-18:00")
+    wednesday   String          @default("08:00-18:00")
+    thursday    String          @default("08:00-18:00")
+    friday      String          @default("08:00-18:00")
+    saturday    String          @default("08:00-12:00")
+    sunday      String          @default("08:00-12:00")
+    owner_id    String          @unique
+    owner       Telegram_user   @relation(fields: [owner_id], references: [id])
+}
+
+
+enum Role {
+    USER
+    OWNER
+}
